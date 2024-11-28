@@ -5,6 +5,12 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
+/*
+* to run this file use the following command
+* javac tool/GenerateAst.java
+* java tool.GenerateAst ../
+* */
+
 public class GenerateAst {
     public static void main(String[] args) throws IOException {
         if (args.length != 1) {
@@ -31,7 +37,7 @@ public class GenerateAst {
         writer.println();
         writer.println("abstract class " + baseName + " {");
 
-//        defineVisitor(writer, baseName, types);
+        defineVisitor(writer, baseName, types);
 
         // The AST classes
         for (String type : types) {
@@ -61,10 +67,28 @@ public class GenerateAst {
         }
         writer.println("    }");
 
+        // Visitor pattern
+        writer.println();
+        writer.println("    @Override");
+        writer.println("  <R> R accept(Visitor<R> visitor) {");
+        writer.println("    return visitor.visit" + className + baseName + "(this);");
+        writer.println("  }");
+
         // Fields
         writer.println();
         for (String field : fields) {
             writer.println("    final " + field + ";");
+        }
+
+        writer.println("  }");
+    }
+
+    private static void defineVisitor(PrintWriter writer, String baseName, List<String> types) {
+        writer.println("  interface Visitor<R> {");
+
+        for (String type : types) {
+            String typeName = type.split(":")[0].trim();
+            writer.println("    R visit" + typeName + baseName + "(" + typeName + " " + baseName.toLowerCase() + ");");
         }
 
         writer.println("  }");
