@@ -7,7 +7,10 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class Brahma {
+    private static final Interpreter interpreter = new Interpreter();
+
     static boolean hadError = false;
+    static boolean hadRuntimeError = false;
 
     public static void main(String[] args) throws IOException {
         if(args.length > 1) {
@@ -27,6 +30,7 @@ public class Brahma {
         run(new String(bytes, Charset.defaultCharset()));
 
         if (hadError) System.exit(65); // Indicate an error in the exit code.
+        if (hadRuntimeError) System.exit(70); // Indicate a runtime error in the exit code.
     }
 
     private static void runPrompt() throws IOException {
@@ -55,7 +59,9 @@ public class Brahma {
 
         if (hadError) return;
 
-        System.out.println(new AstPrinter().print(expression));
+//        System.out.println(new AstPrinter().print(expression));
+
+        interpreter.interpret(expression);
     }
 
     static void error(int line, String message) {
@@ -74,5 +80,10 @@ public class Brahma {
         else {
             report(token.line, " at '" + token.lexeme + "'", message);
         }
+    }
+
+    static void runtimeError(RuntimeError error) {
+        System.err.println(error.getMessage() + "\n[line " + error.token.line + "]");
+        hadRuntimeError = true;
     }
 }
